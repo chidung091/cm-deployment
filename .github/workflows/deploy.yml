@@ -26,6 +26,6 @@ jobs:
           password: ${{ secrets["DO_" + matrix.environment | upper + "_PASSWORD"] }}
           port: 22
           script: |
-            cd /path/to/${{ matrix.environment }}/deployment-folder
+            cd cd-deployment
             docker-compose -f docker-compose.${{ matrix.environment }}.yml pull
             docker-compose -f docker-compose.${{ matrix.environment }}.yml up -d
