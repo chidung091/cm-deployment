@@ -5,51 +5,55 @@ on:
     types: [deploy_dev, deploy_prod]
 
 jobs:
-  deploy:
+  deploy_dev:
+    name: Deploy to Development
     runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        environment: [dev, prod]
+    environment: dev # Associate the job with the 'dev' environment
 
     steps:
       - name: Check if the secret exists
         run: |
-          if [ -z "${{ secrets.DO_DEV_PASSWORD }}" ]; then
-            echo "DO_DEV_PASSWORD is not set."
+          if [ -z "${{ secrets.DO_DEV_SSH_PASSWORD }}" ]; then
+            echo "DO_DEV_SSH_PASSWORD is not set."
             exit 1
           else
-            echo "DO_DEV_PASSWORD is set."
+            echo "DO_DEV_SSH_PASSWORD is set."
           fi
 
       - name: Only run for dev environment
-        if: github.event.action == 'deploy_dev' && matrix.environment == 'dev'
+        if: github.event.action == 'deploy_dev'
         run: echo "Deploying to development environment"
 
-      - name: Only run for prod environment
-        if: github.event.action == 'deploy_prod' && matrix.environment == 'prod'
-        run: echo "Deploying to production environment"
-
       - name: Connect to DigitalOcean via SSH and deploy (Dev)
-        if: github.event.action == 'deploy_dev' && matrix.environment == 'dev'
+        if: github.event.action == 'deploy_dev'
         uses: appleboy/ssh-action@v0.1.5
         with:
           host: ${{ secrets.DO_DEV_DROPLET_IP }}
           username: ${{ secrets.DO_DEV_DROPLET_USER }}
-          password: ${{ secrets.DO_DEV_PASSWORD }}
+          password: ${{ secrets.DO_DEV_SSH_PASSWORD }}
           port: 22
           script: |
             cd cm-deployment
             docker-compose -f docker-compose.dev.yml pull
             docker-compose -f docker-compose.dev.yml up -d
 
+  deploy_prod:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    environment: prod # For the production environment secrets
+
+    steps:
+      - name: Only run for prod environment
+        if: github.event.action == 'deploy_prod'
+        run: echo "Deploying to production environment"
+
       - name: Connect to DigitalOcean via SSH and deploy (Prod)
-        if: github.event.action == 'deploy_prod' && matrix.environment == 'prod'
+        if: github.event.action == 'deploy_prod'
         uses: appleboy/ssh-action@v0.1.5
         with:
-          host: ${{ secrets.DO_PROD_DROPLET_IP }}
+          host: ${{ secrets.DO_PROD_DROPLET_IP }} # Make sure the prod secrets are defined
           username: ${{ secrets.DO_PROD_DROPLET_USER }}
-          password: ${{ secrets.DO_PROD_PASSWORD }}
+          password: ${{ secrets.DO_PROD_SSH_PASSWORD }}
           port: 22
           script: |
             cd cm-deployment
