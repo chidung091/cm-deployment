@@ -1,24 +1,30 @@
-name: Deploy to DigitalOcean
+name: Deploy to DigitalOcean (Dev and Prod)
 
 on:
   repository_dispatch:
-    types: [deploy] # This is triggered by the cm repository
+    types: [deploy_dev, deploy_prod]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
+    strategy:
+      matrix:
+        environment: [dev, prod]
+
     steps:
-      - uses: actions/checkout@v3
+      - name: Only run for matching environment
+        if: github.event.action == 'deploy_' + matrix.environment
+        run: echo "Deploying to ${{ matrix.environment }} environment"
 
       - name: Connect to DigitalOcean via SSH and deploy
-        uses: appleboy/ssh-action@master
+        if: github.event.action == 'deploy_' + matrix.environment
+        uses: appleboy/ssh-action@latest
         with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}
-          password: ${{ secrets.PASSWORD }}
-          port: ${{ secrets.PORT }}
+          host: ${{ secrets["DO_" + matrix.environment | upper + "_DROPLET_IP"] }}
+          username: ${{ secrets["DO_" + matrix.environment | upper + "_DROPLET_USER"] }}
+          key: ${{ secrets["DO_" + matrix.environment | upper + "_SSH_PRIVATE_KEY"] }}
           script: |
-            cd cm-deployment
-            docker-compose pull
-            docker-compose up -d
+            cd /path/to/${{ matrix.environment }}/deployment-folder
+            docker-compose -f docker-compose.${{ matrix.environment }}.yml pull
+            docker-compose -f docker-compose.${{ matrix.environment }}.yml up -d
