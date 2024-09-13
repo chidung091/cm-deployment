@@ -9,12 +9,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - uses: actions/checkout@v3
+
       - name: Connect to DigitalOcean via SSH and deploy
-        uses: appleboy/ssh-action@v0.1.5
+        uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.DO_DROPLET_IP }}
-          username: ${{ secrets.DO_DROPLET_USER }}
-          key: ${{ secrets.DO_SSH_PRIVATE_KEY }}
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          password: ${{ secrets.PASSWORD }}
+          port: ${{ secrets.PORT }}
           script: |
             cd cm-deployment
             docker-compose pull
