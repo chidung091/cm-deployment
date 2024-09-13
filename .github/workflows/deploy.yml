@@ -1,0 +1,21 @@
+name: Deploy to DigitalOcean
+
+on:
+  repository_dispatch:
+    types: [deploy] # This is triggered by the cm repository
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Connect to DigitalOcean via SSH and deploy
+        uses: appleboy/ssh-action@v0.1.5
+        with:
+          host: ${{ secrets.DO_DROPLET_IP }}
+          username: ${{ secrets.DO_DROPLET_USER }}
+          key: ${{ secrets.DO_SSH_PRIVATE_KEY }}
+          script: |
+            cd cm-deployment
+            docker-compose pull
+            docker-compose up -d
