@@ -1,0 +1,30 @@
+version: "3"
+
+services:
+  nextjs-app:
+    image: ghcr.io/chidung091/nextjs-app:dev-latest
+    ports:
+      - "4001:4000" # Different port for dev
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:4000 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    platform: linux/x86_64
+
+  nginx:
+    image: nginx:latest
+    depends_on:
+      - nextjs-app
+    ports:
+      - "8081:80" # Different port for dev
+    volumes:
+      - ./nginx/nginx.dev.conf:/etc/nginx/nginx.conf:ro # Separate config for dev
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    platform: linux/x86_64
