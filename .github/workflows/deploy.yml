@@ -14,13 +14,14 @@ jobs:
 
     steps:
       - name: Check if the secret exists
-          run: |
-            if [ -z "${{ secrets.DO_DEV_PASSWORD }}" ]; then
-              echo "DO_DEV_PASSWORD is not set."
-              exit 1
-            else
-              echo "DO_DEV_PASSWORD is set."
-            fi
+        run: |
+          if [ -z "${{ secrets.DO_DEV_PASSWORD }}" ]; then
+            echo "DO_DEV_PASSWORD is not set."
+            exit 1
+          else
+            echo "DO_DEV_PASSWORD is set."
+          fi
+
       - name: Only run for dev environment
         if: github.event.action == 'deploy_dev' && matrix.environment == 'dev'
         run: echo "Deploying to development environment"
