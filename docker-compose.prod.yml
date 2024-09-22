@@ -2,7 +2,7 @@ version: "3"
 
 services:
   nextjs-app:
-    image: ghcr.io/chidung091/nextjs-app:latest
+    image: ghcr.io/tunglam99/nextjs-app:latest
     ports:
       - "4000:4000" # Standard port for prod
     restart: always

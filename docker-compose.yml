@@ -1,6 +1,6 @@
 services:
   nextjs-app:
-    image: ghcr.io/chidung091/nextjs-app:latest # Placeholder for pushing image to Dockerhub
+    image: ghcr.io/tunglam99/nextjs-app:latest # Placeholder for pushing image to Dockerhub
     ports:
       - "4000:4000"
     restart: always
